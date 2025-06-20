@@ -27,12 +27,13 @@ class VectorServiceImpl(private val vectorStore: VectorStore) : VectorService {
 
   override fun getSimilarDocuments(
     query: String,
-    topK: Int?
+    topK: Int?,
+    threshold: Double?
   ): List<String?> {
     val searchRequest = SearchRequest.builder()
       .query(query)
       .topK(topK ?: 5)
-      .similarityThreshold(0.8)
+      .similarityThreshold(threshold ?: 0.8)
       .build()
     logger.info("Retrieving similar documents for query: $query")
     val results: MutableList<Document>? = vectorStore.similaritySearch(searchRequest)

@@ -44,10 +44,11 @@ class UploadFileController(private val vectorService: VectorService) {
   @GetMapping("/similar")
   fun getSimilarDocuments(
     @RequestParam("query") query: String,
-    @RequestParam("topK", required = false) topK: Int?
+    @RequestParam("topK", required = false) topK: Int?,
+    @RequestParam("threshold", required = false) threshold: Double?
   ): ResponseData<List<String?>> {
     try {
-      val results = vectorService.getSimilarDocuments(query, topK)
+      val results = vectorService.getSimilarDocuments(query, topK, threshold)
       return ResponseData(results, "Retrieved similar documents successfully")
     } catch (e: Exception) {
       return ResponseData(
