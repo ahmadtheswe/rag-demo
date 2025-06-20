@@ -3,6 +3,7 @@ package com.ahmadtheswe.ragdemo.controller
 import com.ahmadtheswe.ragdemo.dto.ResponseData
 import com.ahmadtheswe.ragdemo.dto.UploadTextDto
 import com.ahmadtheswe.ragdemo.service.VectorService
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
@@ -11,32 +12,33 @@ import org.springframework.web.multipart.MultipartFile
 class UploadFileController(private val vectorService: VectorService) {
 
   @PostMapping("/file")
-  fun uploadFile(@RequestParam("file") file: MultipartFile): ResponseData<String> {
+  fun uploadFile(@RequestParam("file") file: MultipartFile): ResponseEntity<ResponseData<String>> {
     try {
-      if (!file.originalFilename?.lowercase()?.endsWith(".txt")!!) {
-        throw IllegalArgumentException("Only .txt files are allowed")
-      }
-
-      val content = String(file.bytes)
-      vectorService.storeFileVectorData(content, file.originalFilename ?: "unknown")
-      return ResponseData("File uploaded successfully")
+      vectorService.storeFileVectorData(file)
+      return ResponseEntity.ok(
+        ResponseData("File uploaded successfully", "File processed and stored")
+      )
     } catch (e: Exception) {
-      return ResponseData(
-        data = "Error: ${e.message}",
-        message = "Failed to upload file"
+      return ResponseEntity.status(500).body(
+        ResponseData(
+          data = "Error: ${e.message}", message = "Failed to upload file"
+        )
       )
     }
   }
 
   @PostMapping("/text")
-  fun uploadText(@RequestBody dto: UploadTextDto): ResponseData<String> {
+  fun uploadText(@RequestBody dto: UploadTextDto): ResponseEntity<ResponseData<String>> {
     try {
       vectorService.storeTextVectorData(dto.text)
-      return ResponseData("Text uploaded successfully")
+      return ResponseEntity.ok(
+        ResponseData("Text uploaded successfully", "Text processed and stored")
+      )
     } catch (e: Exception) {
-      return ResponseData(
-        data = "Error: ${e.message}",
-        message = "Failed to upload text"
+      return ResponseEntity.status(500).body(
+        ResponseData(
+          data = "Error: ${e.message}", message = "Failed to upload text"
+        )
       )
     }
   }
@@ -46,14 +48,17 @@ class UploadFileController(private val vectorService: VectorService) {
     @RequestParam("query") query: String,
     @RequestParam("topK", required = false) topK: Int?,
     @RequestParam("threshold", required = false) threshold: Double?
-  ): ResponseData<List<String?>> {
+  ): ResponseEntity<ResponseData<List<String?>>> {
     try {
       val results = vectorService.getSimilarDocuments(query, topK, threshold)
-      return ResponseData(results, "Retrieved similar documents successfully")
+      return ResponseEntity.ok(
+        ResponseData(results, "Retrieved similar documents successfully")
+      )
     } catch (e: Exception) {
-      return ResponseData(
-        data = emptyList(),
-        message = "Failed to retrieve similar documents: ${e.message}"
+      return ResponseEntity.status(500).body(
+        ResponseData(
+          data = emptyList<String>(), message = "Failed to retrieve similar documents: ${e.message}"
+        )
       )
     }
   }

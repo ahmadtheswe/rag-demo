@@ -1,43 +1,29 @@
 package com.ahmadtheswe.ragdemo.controller
 
 import com.ahmadtheswe.ragdemo.dto.ResponseData
+import com.ahmadtheswe.ragdemo.service.RagService
 import org.slf4j.LoggerFactory
-import org.springframework.ai.chat.client.ChatClient
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/chat")
-class ChatController(chatClientBuilder: ChatClient.Builder) {
+class ChatController(private val ragService: RagService) {
 
   private val logger = LoggerFactory.getLogger(ChatController::class.java)
-  private val chatClient: ChatClient = chatClientBuilder.build()
-
-  @GetMapping("/health")
-  fun healthCheck(): ResponseData<String> {
-    return ResponseData("ok")
-  }
 
   @GetMapping("/ai")
-  fun generation(userInput: String): ResponseData<String> {
-    try {
-      logger.info("User input: $userInput")
-      val content: String? = chatClient.prompt()
-        .user(userInput)
-        .call()
-        .content()
-      logger.info("AI response: $content")
-      return ResponseData(
-        data = content ?: "No response from AI",
-        message = "AI response generated successfully"
-      )
-    } catch (e: Exception) {
-      logger.error("Error during AI generation", e)
-      return ResponseData(
-        data = "Error: ${e.message}",
-        message = "Failed to generate AI response"
-      )
+  fun generation(userInput: String): ResponseEntity<ResponseData<String>> {
+    val response = ragService.ask(userInput)
+    return if (response != null) {
+      logger.info("AI response: $response")
+      ResponseEntity.ok(ResponseData(response, "AI response generated successfully"))
+    } else {
+      logger.error("Failed to generate AI response")
+      ResponseEntity.status(500)
+        .body(ResponseData("Error generating AI response", "Failed to generate AI response"))
     }
   }
 }
