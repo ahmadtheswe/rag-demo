@@ -40,4 +40,20 @@ class UploadFileController(private val vectorService: VectorService) {
       )
     }
   }
+
+  @GetMapping("/similar")
+  fun getSimilarDocuments(
+    @RequestParam("query") query: String,
+    @RequestParam("topK", required = false) topK: Int?
+  ): ResponseData<List<String?>> {
+    try {
+      val results = vectorService.getSimilarDocuments(query, topK)
+      return ResponseData(results, "Retrieved similar documents successfully")
+    } catch (e: Exception) {
+      return ResponseData(
+        data = emptyList(),
+        message = "Failed to retrieve similar documents: ${e.message}"
+      )
+    }
+  }
 }
