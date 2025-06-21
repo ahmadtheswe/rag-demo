@@ -1,0 +1,128 @@
+{
+	"info": {
+		"_postman_id": "4d068cea-121b-4609-804a-2d096330fc46",
+		"name": "RAG-Demo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6648039"
+	},
+	"item": [
+		{
+			"name": "Send JSON Text",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"text\": \"This is an example text for storing to pgvector\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/upload/text",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"upload",
+						"text"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload TXT File",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/ahmad/Desktop/Dudung.txt"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/upload/file",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"upload",
+						"file"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Chat / Ask",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"question\": \"why dudung moved from sumedang to jakarta?\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/chat/ask",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"chat",
+						"ask"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Similarity Query",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/upload/similar?query=ahmad",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"upload",
+						"similar"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "ahmad"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
