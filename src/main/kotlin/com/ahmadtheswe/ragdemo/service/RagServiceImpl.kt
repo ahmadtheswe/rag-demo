@@ -7,17 +7,18 @@ import org.springframework.stereotype.Service
 
 @Service
 class RagServiceImpl(
-  chatClientBuilder: ChatClient.Builder,
-  private val vectorRepository: VectorRepository
+  chatClientBuilder: ChatClient.Builder, private val vectorRepository: VectorRepository
 ) : RagService {
   private val logger = LoggerFactory.getLogger(RagServiceImpl::class.java)
   private val chatClient: ChatClient = chatClientBuilder.build()
 
-  override fun ask(question: String): String? {
+  override fun ask(question: String, threshold: Double?): String? {
     try {
       logger.info("Getting similar documents for question: $question")
       val relevantDocuments =
-        vectorRepository.getSimilarDocuments(question, topK = 5, threshold = 0.5)
+        vectorRepository.getSimilarDocuments(question, topK = 5, threshold = threshold ?: 0.8)
+          .takeIf { it.isNotEmpty() }
+          ?: return "No relevant documents found for the question: $question"
 
       val context = relevantDocuments.joinToString("\n---\n") { it ?: "No content found" }
 
@@ -29,11 +30,8 @@ class RagServiceImpl(
       """.trimIndent()
 
       logger.info("User input: $question")
-      val content: String? = chatClient.prompt()
-        .system(systemPrompt)
-        .user(question)
-        .call()
-        .content()
+      val content: String? =
+        chatClient.prompt().system(systemPrompt).user(question).call().content()
       logger.info("AI response: $content")
       return content
     } catch (e: Exception) {
