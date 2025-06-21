@@ -1,18 +1,36 @@
 package com.ahmadtheswe.ragdemo.service
 
+import com.ahmadtheswe.ragdemo.repository.VectorRepository
 import org.slf4j.LoggerFactory
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.stereotype.Service
 
 @Service
-class RagServiceImpl(chatClientBuilder: ChatClient.Builder) : RagService {
+class RagServiceImpl(
+  chatClientBuilder: ChatClient.Builder,
+  private val vectorRepository: VectorRepository
+) : RagService {
   private val logger = LoggerFactory.getLogger(RagServiceImpl::class.java)
   private val chatClient: ChatClient = chatClientBuilder.build()
 
   override fun ask(question: String): String? {
     try {
+      logger.info("Getting similar documents for question: $question")
+      val relevantDocuments =
+        vectorRepository.getSimilarDocuments(question, topK = 5, threshold = 0.5)
+
+      val context = relevantDocuments.joinToString("\n---\n") { it ?: "No content found" }
+
+      val systemPrompt = """
+          You are a helpful assistant. Use the following context to answer the user's question.
+      
+          Context:
+          $context
+      """.trimIndent()
+
       logger.info("User input: $question")
       val content: String? = chatClient.prompt()
+        .system(systemPrompt)
         .user(question)
         .call()
         .content()
